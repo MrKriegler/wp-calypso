@@ -8,13 +8,12 @@ import { expect } from 'chai';
 /**
  * Internal dependencies
  */
-import { lastActivityTimestamp, lostFocusAt, message } from '../reducer';
+import { lastActivityTimestamp, lostFocusAt } from '../reducer';
 import {
 	HAPPYCHAT_RECEIVE_EVENT,
 	HAPPYCHAT_BLUR,
 	HAPPYCHAT_FOCUS,
 	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
-	HAPPYCHAT_SET_MESSAGE,
 	SERIALIZE,
 } from 'state/action-types';
 import { useSandbox } from 'test/helpers/use-sinon';
@@ -63,23 +62,6 @@ describe( 'reducers', () => {
 
 		test( 'returns null on HAPPYCHAT_FOCUS actions', () => {
 			expect( lostFocusAt( 12345, { type: HAPPYCHAT_FOCUS } ) ).to.be.null;
-		} );
-	} );
-
-	describe( '#message()', () => {
-		test( 'defaults to an empty string', () => {
-			const result = message( undefined, {} );
-			expect( result ).to.eql( '' );
-		} );
-		test( 'saves messages passed from HAPPYCHAT_SET_MESSAGE', () => {
-			const action = { type: HAPPYCHAT_SET_MESSAGE, message: 'abcd' };
-			const result = message( 'abc', action );
-			expect( result ).to.eql( 'abcd' );
-		} );
-		test( 'resets to empty string on HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE', () => {
-			const action = { type: HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE, message: 'abcd' };
-			const result = message( 'abcd', action );
-			expect( result ).to.eql( '' );
 		} );
 	} );
 } );

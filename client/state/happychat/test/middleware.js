@@ -38,7 +38,6 @@ import {
 	HAPPYCHAT_BLUR,
 	HAPPYCHAT_IO_SEND_MESSAGE_USERINFO,
 	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
-	HAPPYCHAT_SET_MESSAGE,
 	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
 } from 'state/action-types';
 import { useSandbox } from 'test/helpers/use-sinon';
@@ -261,21 +260,6 @@ describe( 'middleware', () => {
 			};
 			middleware( connection )( { getState: noop } )( noop )( action );
 			expect( connection.send ).to.have.been.calledWith( action.message );
-			expect( connection.notTyping ).to.have.been.calledOnce;
-		} );
-	} );
-
-	describe( 'HAPPYCHAT_SET_MESSAGE action', () => {
-		test( 'should send the connection a typing signal when a message is present', () => {
-			const action = { type: HAPPYCHAT_SET_MESSAGE, message: 'Hello world' };
-			const connection = { typing: spy() };
-			middleware( connection )( { getState: noop } )( noop )( action );
-			expect( connection.typing ).to.have.been.calledWith( action.message );
-		} );
-		test( 'should send the connection a notTyping signal when the message is blank', () => {
-			const action = { type: HAPPYCHAT_SET_MESSAGE, message: '' };
-			const connection = { notTyping: spy() };
-			middleware( connection )( { getState: noop } )( noop )( action );
 			expect( connection.notTyping ).to.have.been.calledOnce;
 		} );
 	} );

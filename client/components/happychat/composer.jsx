@@ -1,18 +1,17 @@
+/** @format */
+
 /**
  * External dependencies
- *
- * @format
  */
-
-import classNames from 'classnames';
 import React from 'react';
 import { connect } from 'react-redux';
-import { isEmpty } from 'lodash';
+import { isEmpty, throttle } from 'lodash';
+import classNames from 'classnames';
+
 /**
  * Internal dependencies
  */
-import { setChatMessage } from 'state/happychat/actions';
-import { sendChatMessage, sendNotTyping } from 'state/happychat/connection/actions';
+import { sendChatMessage, sendTyping, sendNotTyping } from 'state/happychat/connection/actions';
 import { canUserSendMessages } from 'state/happychat/selectors';
 import { when, forEach, compose, propEquals, call, prop } from './functional';
 import scrollbleed from './scrollbleed';
@@ -22,6 +21,14 @@ import { translate } from 'i18n-calypso';
 const returnPressed = propEquals( 'which', 13 );
 // helper function that calls prevents default on the DOM event
 const preventDefault = call( 'preventDefault' );
+
+const sendThrottledTyping = throttle(
+	( connection, message ) => {
+		sendTyping( message );
+	},
+	1000,
+	{ leading: true, trailing: false }
+);
 
 /*
  * Renders a textarea to be used to comopose a message for the chat.
@@ -33,19 +40,19 @@ export const Composer = React.createClass( {
 		const {
 			disabled,
 			message,
-			onUpdateChatMessage,
 			onSendChatMessage,
 			onSendNotTyping,
+			onSendTyping,
 			onFocus,
 		} = this.props;
 		const sendMessage = when(
 			() => ! isEmpty( message ),
 			() => {
 				onSendChatMessage( message );
-				onSendNotTyping( message );
+				onSendNotTyping();
 			}
 		);
-		const onChange = compose( prop( 'target.value' ), onUpdateChatMessage );
+		const onChange = compose( prop( 'target.value' ), onSendTyping );
 		const onKeyDown = when( returnPressed, forEach( preventDefault, sendMessage ) );
 		const composerClasses = classNames( 'happychat__composer', {
 			'is-disabled': disabled,
@@ -85,14 +92,14 @@ const mapState = state => ( {
 } );
 
 const mapDispatch = dispatch => ( {
-	onUpdateChatMessage( message ) {
-		dispatch( setChatMessage( message ) );
+	onSendTyping( message ) {
+		isEmpty( message ) ? sendNotTyping() : sendThrottledTyping( message );
 	},
 	onSendChatMessage( message ) {
 		dispatch( sendChatMessage( message ) );
 	},
-	onSendNotTyping( message ) {
-		dispatch( sendNotTyping( message ) );
+	onSendNotTyping() {
+		dispatch( sendNotTyping() );
 	},
 } );
 

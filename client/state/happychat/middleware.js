@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { has, isEmpty, noop, throttle } from 'lodash';
+import { has, noop } from 'lodash';
 
 /**
  * Internal dependencies
@@ -17,7 +17,6 @@ import {
 	HAPPYCHAT_IO_SEND_MESSAGE_USERINFO,
 	HAPPYCHAT_IO_SEND_PREFERENCES,
 	HAPPYCHAT_IO_SEND_TYPING,
-	HAPPYCHAT_SET_MESSAGE,
 	HELP_CONTACT_FORM_SITE_SELECT,
 	ROUTE_SET,
 	COMMENTS_CHANGE_STATUS,
@@ -37,24 +36,10 @@ import {
 	PURCHASE_REMOVE_COMPLETED,
 	SITE_SETTINGS_SAVE_SUCCESS,
 } from 'state/action-types';
-import {
-	sendEvent,
-	sendLog,
-	sendPreferences,
-	sendTyping,
-	sendNotTyping,
-} from './connection/actions';
+import { sendEvent, sendLog, sendPreferences } from './connection/actions';
 import { isHappychatChatAssigned, getGroups } from './selectors';
 import isHappychatClientConnected from 'state/happychat/selectors/is-happychat-client-connected';
 import { getCurrentUser, getCurrentUserLocale } from 'state/current-user/selectors';
-
-const sendThrottledTyping = throttle(
-	( connection, message ) => {
-		sendTyping( message );
-	},
-	1000,
-	{ leading: true, trailing: false }
-);
 
 export const getEventMessageFromActionData = action => {
 	// Below we've stubbed in the actions we think we'll care about, so that we can
@@ -184,12 +169,6 @@ export default function( connection = null ) {
 
 			case HAPPYCHAT_IO_REQUEST_TRANSCRIPT:
 				connection.request( action, 10000 );
-				break;
-
-			// Converts Happychat UI action => SocketIO action
-			case HAPPYCHAT_SET_MESSAGE:
-				const { message } = action;
-				isEmpty( message ) ? sendNotTyping() : sendThrottledTyping( message );
 				break;
 
 			// Converts Calypso action => SocketIO action

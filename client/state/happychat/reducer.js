@@ -20,7 +20,6 @@ import {
 	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
 	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_TIMEOUT,
 	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
-	HAPPYCHAT_SET_MESSAGE,
 } from 'state/action-types';
 import { combineReducers, isValidStateWithSchema } from 'state/utils';
 import { HAPPYCHAT_CHAT_STATUS_DEFAULT } from './selectors';
@@ -126,24 +125,6 @@ const timeline = ( state = [], action ) => {
 timeline.hasCustomPersistence = true;
 
 /**
- * Tracks the current message the user has typed into the happychat client
- *
- * @param  {Object} state  Current state
- * @param  {Object} action Action payload
- * @return {Object}        Updated state
- *
- */
-export const message = ( state = '', action ) => {
-	switch ( action.type ) {
-		case HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE:
-			return '';
-		case HAPPYCHAT_SET_MESSAGE:
-			return action.message;
-	}
-	return state;
-};
-
-/**
  * Tracks the state of the happychat chat. Valid states are:
  *
  *  - HAPPYCHAT_CHAT_STATUS_DEFAULT : no chat has been started
@@ -213,7 +194,6 @@ export default combineReducers( {
 	chatStatus,
 	lastActivityTimestamp,
 	lostFocusAt,
-	message,
 	timeline,
 	user,
 	connection,
