@@ -11,7 +11,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import { sendChatMessage, sendTyping, sendNotTyping } from 'state/happychat/connection/actions';
+import { sendMessage, sendTyping, sendNotTyping } from 'state/happychat/connection/actions';
 import { canUserSendMessages } from 'state/happychat/selectors';
 import { when, forEach, compose, propEquals, call, prop } from './functional';
 import scrollbleed from './scrollbleed';
@@ -37,23 +37,16 @@ export const Composer = React.createClass( {
 	mixins: [ scrollbleed ],
 
 	render() {
-		const {
-			disabled,
-			message,
-			onSendChatMessage,
-			onSendNotTyping,
-			onSendTyping,
-			onFocus,
-		} = this.props;
-		const sendMessage = when(
+		const { disabled, message, onSendMessage, onSendNotTyping, onSendTyping, onFocus } = this.props;
+		const sendMsg = when(
 			() => ! isEmpty( message ),
 			() => {
-				onSendChatMessage( message );
+				onSendMessage( message );
 				onSendNotTyping();
 			}
 		);
 		const onChange = compose( prop( 'target.value' ), onSendTyping );
-		const onKeyDown = when( returnPressed, forEach( preventDefault, sendMessage ) );
+		const onKeyDown = when( returnPressed, forEach( preventDefault, sendMsg ) );
 		const composerClasses = classNames( 'happychat__composer', {
 			'is-disabled': disabled,
 		} );
@@ -95,11 +88,11 @@ const mapDispatch = dispatch => ( {
 	onSendTyping( message ) {
 		isEmpty( message ) ? sendNotTyping() : sendThrottledTyping( message );
 	},
-	onSendChatMessage( message ) {
-		dispatch( sendChatMessage( message ) );
-	},
 	onSendNotTyping() {
 		dispatch( sendNotTyping() );
+	},
+	onSendMessage( message ) {
+		dispatch( sendMessage( message ) );
 	},
 } );
 
