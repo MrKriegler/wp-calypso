@@ -99,7 +99,7 @@ export const getEventMessageFromTracksData = ( { name, properties } ) => {
 	return null;
 };
 
-export const sendAnalyticsLogEvent = ( connection, { meta: { analytics: analyticsMeta } } ) => {
+export const sendAnalyticsLogEvent = ( { meta: { analytics: analyticsMeta } } ) => {
 	analyticsMeta.forEach( ( { type, payload: { service, name, properties } } ) => {
 		if ( type === ANALYTICS_EVENT_RECORD && service === 'tracks' ) {
 			// Check if this event should generate a timeline event, and send it if so
@@ -115,7 +115,7 @@ export const sendAnalyticsLogEvent = ( connection, { meta: { analytics: analytic
 	} );
 };
 
-export const sendActionLogsAndEvents = ( connection, { getState }, action ) => {
+export const sendActionLogsAndEvents = ( { getState }, action ) => {
 	const state = getState();
 
 	// If there's not an active Happychat session, do nothing
@@ -125,7 +125,7 @@ export const sendActionLogsAndEvents = ( connection, { getState }, action ) => {
 
 	// If there's analytics metadata attached to this action, send analytics events
 	if ( has( action, 'meta.analytics' ) ) {
-		sendAnalyticsLogEvent( connection, action );
+		sendAnalyticsLogEvent( action );
 	}
 
 	// Check if this action should generate a timeline event, and send it if so
@@ -150,7 +150,8 @@ export default function( connection = null ) {
 
 	return store => next => action => {
 		// Send any relevant log/event data from this action to Happychat
-		sendActionLogsAndEvents( connection, store, action );
+		// Converts Calpso action => SocketIO action
+		sendActionLogsAndEvents( store, action );
 
 		const state = store.getState();
 		switch ( action.type ) {
