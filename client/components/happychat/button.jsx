@@ -20,12 +20,12 @@ import viewport from 'lib/viewport';
 import { hasUnreadMessages, hasActiveHappychatSession } from 'state/happychat/selectors';
 import isHappychatAvailable from 'state/happychat/selectors/is-happychat-available';
 import isHappychatConnectionUninitialized from 'state/happychat/selectors/is-happychat-connection-uninitialized';
-import getHappychatConfig from 'state/happychat/selectors/get-happychat-user';
+import getHappychatConfig from 'state/happychat/selectors/get-happychat-config';
 import { initConnection } from 'state/happychat/connection/actions';
 import { openChat } from 'state/ui/happychat/actions';
 import Button from 'components/button';
 
-class HappychatButton extends Component {
+export class HappychatButton extends Component {
 	static propTypes = {
 		allowMobileRedirect: PropTypes.bool,
 		borderless: PropTypes.bool,

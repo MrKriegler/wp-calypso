@@ -13,7 +13,6 @@ import { spy, stub } from 'sinon';
  * Internal dependencies
  */
 import middleware, {
-	connectChat,
 	connectIfRecentlyActive,
 	requestTranscript,
 	sendActionLogsAndEvents,
@@ -30,7 +29,6 @@ import {
 import {
 	HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED,
 	HAPPYCHAT_CONNECTION_STATUS_CONNECTED,
-	HAPPYCHAT_CONNECTION_STATUS_CONNECTING,
 } from 'state/happychat/constants';
 import wpcom from 'lib/wp';
 import {
@@ -43,61 +41,6 @@ import {
 import { useSandbox } from 'test/helpers/use-sinon';
 
 describe( 'middleware', () => {
-	describe( 'HAPPYCHAT_CONNECT action', () => {
-		// TODO: Add tests for cases outside the happy path
-		let connection;
-		let dispatch, getState;
-		const uninitializedState = deepFreeze( {
-			currentUser: { id: 1, capabilities: {} },
-			happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED } },
-			users: { items: { 1: {} } },
-			help: { selectedSiteId: 2647731 },
-			sites: {
-				items: {
-					2647731: {
-						ID: 2647731,
-						name: 'Manual Automattic Updates',
-					},
-				},
-			},
-			ui: {
-				section: {
-					name: 'reader',
-				},
-			},
-		} );
-
-		useSandbox( sandbox => {
-			connection = {
-				init: sandbox.stub().returns( Promise.resolve() ),
-			};
-			dispatch = sandbox.stub();
-			getState = sandbox.stub();
-			sandbox.stub( wpcom, 'request', ( args, callback ) => callback( null, {} ) );
-		} );
-
-		test( 'should not attempt to connect when Happychat has been initialized', () => {
-			const connectedState = {
-				happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTED } },
-			};
-			const connectingState = {
-				happychat: { connection: { status: HAPPYCHAT_CONNECTION_STATUS_CONNECTING } },
-			};
-
-			return Promise.all( [
-				connectChat( connection, { dispatch, getState: getState.returns( connectedState ) } ),
-				connectChat( connection, { dispatch, getState: getState.returns( connectingState ) } ),
-			] ).then( () => expect( connection.init ).not.to.have.been.called );
-		} );
-
-		test( 'should attempt to connect when Happychat is uninitialized', () => {
-			getState.returns( uninitializedState );
-			return connectChat( connection, { dispatch, getState } ).then( () => {
-				expect( connection.init ).to.have.been.calledOnce;
-			} );
-		} );
-	} );
-
 	describe( 'HAPPYCHAT_IO_SEND_MESSAGE_USERINFO action', () => {
 		const state = {
 			happychat: {
