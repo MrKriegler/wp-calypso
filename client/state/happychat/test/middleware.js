@@ -6,7 +6,6 @@
 import { expect } from 'chai';
 import deepFreeze from 'deep-freeze';
 import { noop } from 'lodash';
-import moment from 'moment';
 import { spy, stub } from 'sinon';
 
 /**
@@ -19,7 +18,6 @@ import middleware, {
 	sendAnalyticsLogEvent,
 	sendRouteSetEventMessage,
 	updateChatPreferences,
-	sendInfo,
 } from '../middleware';
 import {
 	HAPPYCHAT_CHAT_STATUS_ASSIGNED,
@@ -34,85 +32,12 @@ import wpcom from 'lib/wp';
 import {
 	ANALYTICS_EVENT_RECORD,
 	HAPPYCHAT_BLUR,
-	HAPPYCHAT_IO_SEND_MESSAGE_USERINFO,
 	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
 	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
 } from 'state/action-types';
 import { useSandbox } from 'test/helpers/use-sinon';
 
 describe( 'middleware', () => {
-	describe( 'HAPPYCHAT_IO_SEND_MESSAGE_USERINFO action', () => {
-		const state = {
-			happychat: {
-				user: {
-					geoLocation: {
-						city: 'Timisoara',
-					},
-				},
-			},
-		};
-
-		const previousWindow = global.window;
-		const previousScreen = global.screen;
-		const previousNavigator = global.navigator;
-
-		beforeAll( () => {
-			global.window = {
-				innerWidth: 'windowInnerWidth',
-				innerHeight: 'windowInnerHeight',
-			};
-			global.screen = {
-				width: 'screenWidth',
-				height: 'screenHeight',
-			};
-			global.navigator = {
-				userAgent: 'navigatorUserAgent',
-			};
-		} );
-
-		afterAll( () => {
-			global.window = previousWindow;
-			global.screen = previousScreen;
-			global.navigator = previousNavigator;
-		} );
-
-		test( 'should send relevant browser information to the connection', () => {
-			const expectedInfo = {
-				howCanWeHelp: 'howCanWeHelp',
-				howYouFeel: 'howYouFeel',
-				siteId: 'siteId',
-				siteUrl: 'siteUrl',
-				localDateTime: moment().format( 'h:mm a, MMMM Do YYYY' ),
-				screenSize: {
-					width: 'screenWidth',
-					height: 'screenHeight',
-				},
-				browserSize: {
-					width: 'windowInnerWidth',
-					height: 'windowInnerHeight',
-				},
-				userAgent: 'navigatorUserAgent',
-				geoLocation: state.happychat.user.geoLocation,
-			};
-
-			const getState = () => state;
-			const connection = { sendInfo: spy() };
-			const action = {
-				type: HAPPYCHAT_IO_SEND_MESSAGE_USERINFO,
-				site: {
-					ID: 'siteId',
-					URL: 'siteUrl',
-				},
-				howCanWeHelp: 'howCanWeHelp',
-				howYouFeel: 'howYouFeel',
-			};
-			sendInfo( connection, { getState }, action );
-
-			expect( connection.sendInfo ).to.have.been.calledOnce;
-			expect( connection.sendInfo ).to.have.been.calledWithMatch( expectedInfo );
-		} );
-	} );
-
 	describe( 'HAPPYCHAT_INITIALIZE action', () => {
 		// TODO: This test is only complicated because connectIfRecentlyActive calls
 		// connectChat directly, and since both are in the same module we can't stub
