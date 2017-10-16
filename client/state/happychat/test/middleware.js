@@ -5,13 +5,12 @@
  */
 import { expect } from 'chai';
 import deepFreeze from 'deep-freeze';
-import { noop } from 'lodash';
-import { spy, stub } from 'sinon';
+import { stub } from 'sinon';
 
 /**
  * Internal dependencies
  */
-import middleware, {
+import {
 	requestTranscript,
 	sendActionLogsAndEvents,
 	sendAnalyticsLogEvent,
@@ -30,25 +29,11 @@ import {
 import {
 	ANALYTICS_EVENT_RECORD,
 	HAPPYCHAT_BLUR,
-	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
 	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
 } from 'state/action-types';
 import { useSandbox } from 'test/helpers/use-sinon';
 
 describe( 'middleware', () => {
-	describe( 'HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE action', () => {
-		test( 'should send the message through the connection and send a notTyping signal', () => {
-			const action = { type: HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE, message: 'Hello world' };
-			const connection = {
-				send: spy(),
-				notTyping: spy(),
-			};
-			middleware( connection )( { getState: noop } )( noop )( action );
-			expect( connection.send ).to.have.been.calledWith( action.message );
-			expect( connection.notTyping ).to.have.been.calledOnce;
-		} );
-	} );
-
 	describe( 'HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE action', () => {
 		test( 'should fetch transcript from connection and dispatch receive action', () => {
 			const state = deepFreeze( {
