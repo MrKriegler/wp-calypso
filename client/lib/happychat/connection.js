@@ -20,7 +20,7 @@ import {
 	receiveStatus,
 	receiveToken,
 	receiveUnauthorized,
-	requestChatTranscript,
+	requestTranscript,
 } from 'state/happychat/connection/actions';
 
 const debug = require( 'debug' )( 'calypso:happychat:connection' );
@@ -60,7 +60,7 @@ class Connection {
 						} )
 						.on( 'init', () => {
 							dispatch( receiveInit( { signer_user_id, locale, groups, geo_location } ) );
-							dispatch( requestChatTranscript() );
+							dispatch( requestTranscript() );
 							resolve( socket );
 						} )
 						.on( 'unauthorized', () => {
