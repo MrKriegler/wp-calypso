@@ -99,23 +99,23 @@ export const getEventMessageFromTracksData = ( { name, properties } ) => {
 	return null;
 };
 
-export const sendAnalyticsLogEvent = ( { meta: { analytics: analyticsMeta } } ) => {
+export const sendAnalyticsLogEvent = ( dispatch, { meta: { analytics: analyticsMeta } } ) => {
 	analyticsMeta.forEach( ( { type, payload: { service, name, properties } } ) => {
 		if ( type === ANALYTICS_EVENT_RECORD && service === 'tracks' ) {
 			// Check if this event should generate a timeline event, and send it if so
 			const eventMessage = getEventMessageFromTracksData( { name, properties } );
 			if ( eventMessage ) {
 				// Once we want these events to appear in production we should change this to sendEvent
-				sendEvent( eventMessage );
+				dispatch( sendEvent( eventMessage ) );
 			}
 
 			// Always send a log for every tracks event
-			sendLog( name );
+			dispatch( sendLog( name ) );
 		}
 	} );
 };
 
-export const sendActionLogsAndEvents = ( { getState }, action ) => {
+export const sendActionLogsAndEvents = ( { getState, dispatch }, action ) => {
 	const state = getState();
 
 	// If there's not an active Happychat session, do nothing
@@ -125,19 +125,19 @@ export const sendActionLogsAndEvents = ( { getState }, action ) => {
 
 	// If there's analytics metadata attached to this action, send analytics events
 	if ( has( action, 'meta.analytics' ) ) {
-		sendAnalyticsLogEvent( action );
+		sendAnalyticsLogEvent( dispatch, action );
 	}
 
 	// Check if this action should generate a timeline event, and send it if so
 	const eventMessage = getEventMessageFromActionData( action );
 	if ( eventMessage ) {
 		// Once we want these events to appear in production we should change this to sendEvent
-		sendEvent( eventMessage );
+		dispatch( sendEvent( eventMessage ) );
 	}
 };
 
-const getRouteSetMessage = ( { getState }, action ) => {
-	const currentUser = getCurrentUser( getState );
+const getRouteSetMessage = ( state, action ) => {
+	const currentUser = getCurrentUser( state );
 	return `Looking at https://wordpress.com${ action.path }?support_user=${ currentUser.username }`;
 };
 
@@ -149,11 +149,12 @@ export default function( connection = null ) {
 	}
 
 	return store => next => action => {
+		const state = store.getState();
+
 		// Send any relevant log/event data from this action to Happychat
 		// Converts Calpso action => SocketIO action
 		sendActionLogsAndEvents( store, action );
 
-		const state = store.getState();
 		switch ( action.type ) {
 			case HAPPYCHAT_IO_INIT:
 				connection.init( store.dispatch, action.config );
@@ -169,20 +170,22 @@ export default function( connection = null ) {
 				break;
 
 			case HAPPYCHAT_IO_REQUEST_TRANSCRIPT:
-				connection.request( action, 10000 );
+				connection.request( action, action.timeout );
 				break;
 
 			// Converts Calypso action => SocketIO action
 			case HELP_CONTACT_FORM_SITE_SELECT:
 				isHappychatClientConnected( state )
-					? sendPreferences( getCurrentUserLocale( state ), getGroups( state, action.siteId ) )
+					? store.dispatch(
+							sendPreferences( getCurrentUserLocale( state ), getGroups( state, action.siteId ) )
+						)
 					: noop;
 				break;
 
 			// Converts Calypso action => SocketIO action
 			case ROUTE_SET:
 				isHappychatClientConnected( state ) && isHappychatChatAssigned( state )
-					? sendEvent( getRouteSetMessage( store, action ) )
+					? store.dispatch( sendEvent( getRouteSetMessage( state, action ) ) )
 					: noop;
 				break;
 		}
