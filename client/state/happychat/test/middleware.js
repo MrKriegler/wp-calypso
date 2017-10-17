@@ -11,7 +11,6 @@ import { stub } from 'sinon';
  * Internal dependencies
  */
 import {
-	requestTranscript,
 	sendActionLogsAndEvents,
 	sendAnalyticsLogEvent,
 	sendRouteSetEventMessage,
@@ -26,41 +25,10 @@ import {
 	HAPPYCHAT_CONNECTION_STATUS_UNINITIALIZED,
 	HAPPYCHAT_CONNECTION_STATUS_CONNECTED,
 } from 'state/happychat/constants';
-import {
-	ANALYTICS_EVENT_RECORD,
-	HAPPYCHAT_BLUR,
-	HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
-} from 'state/action-types';
+import { ANALYTICS_EVENT_RECORD, HAPPYCHAT_BLUR } from 'state/action-types';
 import { useSandbox } from 'test/helpers/use-sinon';
 
 describe( 'middleware', () => {
-	describe( 'HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE action', () => {
-		test( 'should fetch transcript from connection and dispatch receive action', () => {
-			const state = deepFreeze( {
-				happychat: {
-					timeline: [],
-				},
-			} );
-			const response = {
-				messages: [ { text: 'hello' } ],
-				timestamp: 100000,
-			};
-
-			const connection = { transcript: stub().returns( Promise.resolve( response ) ) };
-			const dispatch = stub();
-			const getState = stub().returns( state );
-
-			return requestTranscript( connection, { getState, dispatch } ).then( () => {
-				expect( connection.transcript ).to.have.been.called;
-
-				expect( dispatch ).to.have.been.calledWith( {
-					type: HAPPYCHAT_IO_REQUEST_TRANSCRIPT_RECEIVE,
-					...response,
-				} );
-			} );
-		} );
-	} );
-
 	describe( 'HELP_CONTACT_FORM_SITE_SELECT action', () => {
 		test( 'should send the locale and groups through the connection and send a preferences signal', () => {
 			const state = {
