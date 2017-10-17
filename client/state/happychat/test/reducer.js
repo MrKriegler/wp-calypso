@@ -10,9 +10,9 @@ import { expect } from 'chai';
  */
 import { lastActivityTimestamp, lostFocusAt } from '../reducer';
 import {
-	HAPPYCHAT_RECEIVE_EVENT,
 	HAPPYCHAT_BLUR,
 	HAPPYCHAT_FOCUS,
+	HAPPYCHAT_IO_RECEIVE_MESSAGE,
 	HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE,
 	SERIALIZE,
 } from 'state/action-types';
@@ -35,7 +35,7 @@ describe( 'reducers', () => {
 		test( 'should update on certain activity-specific actions', () => {
 			let result;
 
-			result = lastActivityTimestamp( null, { type: HAPPYCHAT_RECEIVE_EVENT } );
+			result = lastActivityTimestamp( null, { type: HAPPYCHAT_IO_RECEIVE_MESSAGE } );
 			expect( result ).to.equal( NOW );
 
 			result = lastActivityTimestamp( null, { type: HAPPYCHAT_IO_SEND_MESSAGE_MESSAGE } );
